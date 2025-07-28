@@ -73,7 +73,20 @@ export default class HeadingIndent extends Plugin {
         this.shitIndenting.setObserverToActiveLeaf(this);
       }
     });
-    
+
+    // When the window resizes :D maybe
+    this.paneResize = this.app.workspace.on('resize', (leaf) => {
+      const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+      if (!activeView || 'markdown' !== activeView.getViewType()){
+	return;
+      const view = activeView as MarkdownView;
+      const mode = view.getMode();
+      if (mode == "preview"){
+        this.shitIndenting.applyIndent(this,500,false,"layout-change");
+        this.shitIndenting.setObserverToActiveLeaf(this);
+      }
+    }
+					    
     // when the currently active leaf (tab or pane) in the workspace changes
     // opening a new file, switching between files, or switching between edit and preview mode
     this.activeLeafChangeListener = this.app.workspace.on('active-leaf-change', (leaf) => {
@@ -99,5 +112,6 @@ export default class HeadingIndent extends Plugin {
     // todo: is this working?
     this.app.workspace.offref(this.activeLeafChangeListener);
     this.app.workspace.offref(this.layoutChange);
+    this.app.workspace.offref(this.paneResize);
   }
 }
